@@ -28,13 +28,15 @@ Name: ${business.name}
 Industry: ${business.industry}
 Description: ${business.description}
 Goal: ${business.goal}
+Status: ${business.status === 'planning' ? 'Going to start (Planning Phase)' : 'Already Started (Active)'}
+Currency: ${business.currency || 'USD'}
 
 Financials:
-Monthly Revenue: $${finance.monthly_revenue}
-Monthly Expenses: $${finance.monthly_expenses}
-Cash on Hand: $${finance.cash_on_hand}
+Monthly Revenue: ${business.currency || 'USD'} ${finance.monthly_revenue || 0}
+Monthly Expenses: ${business.currency || 'USD'} ${finance.monthly_expenses || 0}
+Cash on Hand / Initial Capital: ${business.currency || 'USD'} ${finance.cash_on_hand || 0}
 
-Analyze this business and provide a growth suggestion, a marketing suggestion, a finance insight in plain English, and an estimated runway in months (number).
+Analyze this business. If it's in the planning phase, provide a launch growth strategy, a pre-launch marketing suggestion, a startup finance insight in plain English, and an estimated runway in months (number). If already started, provide standard growth, marketing, and finance insights.
 `;
 
                 const completion = await openai.chat.completions.create({
@@ -70,6 +72,40 @@ Analyze this business and provide a growth suggestion, a marketing suggestion, a
                 res.status(500).json({ error: 'Failed to generate AI analysis' });
             }
         });
+    });
+});
+
+// POST /api/ai/chat
+router.post('/chat', verifyToken, (req, res) => {
+    const { topic, message, history = [] } = req.body;
+    const userId = req.userId;
+
+    db.get(`SELECT * FROM businesses WHERE user_id = ?`, [userId], async (err, business) => {
+        if (err || !business) return res.status(404).json({ error: 'Business not found' });
+
+        try {
+            const systemPrompt = `You are an expert AI advisor for a business named "${business.name}" in the ${business.industry} industry. 
+The user is asking a question specifically about: ${topic}. 
+Their business goal is: ${business.goal}. 
+Status: ${business.status === 'planning' ? 'Planning phase' : 'Active'}.
+Provide a concise, helpful, and strategic answer. Format your response in plain text.`;
+
+            const messages = [
+                { role: "system", content: systemPrompt },
+                ...history.map(m => ({ role: m.role, content: m.content })),
+                { role: "user", content: message }
+            ];
+
+            const completion = await openai.chat.completions.create({
+                model: "gpt-4o-mini",
+                messages: messages,
+            });
+
+            res.json({ response: completion.choices[0].message.content });
+        } catch (apiErr) {
+            console.error("OpenAI Chat Error:", apiErr);
+            res.status(500).json({ error: 'Failed to generate chat response' });
+        }
     });
 });
 

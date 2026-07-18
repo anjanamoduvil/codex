@@ -9,8 +9,9 @@ router.post('/', verifyToken, (req, res) => {
     const { monthly_revenue, monthly_expenses, cash_on_hand, month } = req.body;
     const userId = req.userId;
 
-    if (monthly_revenue === undefined || monthly_expenses === undefined) {
-        return res.status(400).json({ error: 'Revenue and expenses are required' });
+    // Validation relaxed to allow 0 or only cash_on_hand for planning businesses
+    if (cash_on_hand === undefined) {
+        return res.status(400).json({ error: 'Cash / Initial Capital is required' });
     }
 
     // Get business id for user

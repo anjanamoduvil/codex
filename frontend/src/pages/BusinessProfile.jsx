@@ -7,15 +7,13 @@ const BusinessProfile = () => {
         name: '',
         industry: '',
         description: '',
-        goal: ''
+        goal: '',
+        status: 'started',
+        currency: 'USD'
     });
     const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
-
-    useEffect(() => {
-        // Fetch existing if we want to allow edits, skipping for MVP speed unless needed
-    }, []);
 
     const handleChange = (e) => {
         setFormData({ ...formData, [e.target.name]: e.target.value });
@@ -27,7 +25,9 @@ const BusinessProfile = () => {
         setError('');
         try {
             await api.post('/business', formData);
-            navigate('/finance'); // Move to next step
+            // Pass status and currency to sessionStorage so FinanceInput knows the context
+            sessionStorage.setItem('bizContext', JSON.stringify({ status: formData.status, currency: formData.currency }));
+            navigate('/finance');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to save business profile');
         } finally {
@@ -48,37 +48,42 @@ const BusinessProfile = () => {
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
+                            <label className="label-text">Business Status</label>
+                            <select name="status" className="input-field" value={formData.status} onChange={handleChange}>
+                                <option value="started">Already Started</option>
+                                <option value="planning">Going to Start (Planning)</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="label-text">Preferred Currency</label>
+                            <select name="currency" className="input-field" value={formData.currency} onChange={handleChange}>
+                                <option value="USD">USD ($)</option>
+                                <option value="EUR">EUR (€)</option>
+                                <option value="GBP">GBP (£)</option>
+                                <option value="INR">INR (₹)</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
                             <label className="label-text">Business Name</label>
-                            <input 
-                                type="text" name="name" className="input-field" 
-                                placeholder="Acme Corp" value={formData.name} onChange={handleChange} required
-                            />
+                            <input type="text" name="name" className="input-field" placeholder="Acme Corp" value={formData.name} onChange={handleChange} required />
                         </div>
                         <div>
                             <label className="label-text">Industry</label>
-                            <input 
-                                type="text" name="industry" className="input-field" 
-                                placeholder="E-commerce, SaaS, etc." value={formData.industry} onChange={handleChange} required
-                            />
+                            <input type="text" name="industry" className="input-field" placeholder="E-commerce, SaaS, etc." value={formData.industry} onChange={handleChange} required />
                         </div>
                     </div>
                     
                     <div>
                         <label className="label-text">Business Description</label>
-                        <textarea 
-                            name="description" className="input-field min-h-[100px] resize-none" 
-                            placeholder="What does your business do? Who are your customers?" 
-                            value={formData.description} onChange={handleChange}
-                        ></textarea>
+                        <textarea name="description" className="input-field min-h-[100px] resize-none" placeholder="What does your business do? Who are your customers?" value={formData.description} onChange={handleChange}></textarea>
                     </div>
 
                     <div>
                         <label className="label-text">Primary Goal</label>
-                        <input 
-                            type="text" name="goal" className="input-field" 
-                            placeholder="e.g., Increase ARR by 20%, reduce churn, etc." 
-                            value={formData.goal} onChange={handleChange}
-                        />
+                        <input type="text" name="goal" className="input-field" placeholder="e.g., Increase ARR by 20%, reduce churn, etc." value={formData.goal} onChange={handleChange} />
                     </div>
 
                     <div className="flex justify-end pt-4">

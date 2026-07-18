@@ -25,6 +25,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 industry TEXT,
                 description TEXT,
                 goal TEXT,
+                status TEXT DEFAULT 'started',
+                currency TEXT DEFAULT 'USD',
                 FOREIGN KEY(user_id) REFERENCES users(id)
             )`);
 
