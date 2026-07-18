@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import api from '../api/axios';
+import { motion } from 'framer-motion';
 
 const BusinessProfile = () => {
     const [formData, setFormData] = useState({
@@ -8,55 +9,100 @@ const BusinessProfile = () => {
         industry: '',
         description: '',
         goal: '',
-        status: 'started',
+        status: 'planning', // planning or active
         currency: 'USD'
     });
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
     const navigate = useNavigate();
 
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+    useEffect(() => {
+        const fetchProfile = async () => {
+            try {
+                const res = await api.get('/business');
+                if (res.data) setFormData(res.data);
+            } catch (err) {
+                // No profile yet, that's fine
+            }
+        };
+        fetchProfile();
+    }, []);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
         try {
             await api.post('/business', formData);
-            // Pass status and currency to sessionStorage so FinanceInput knows the context
-            sessionStorage.setItem('bizContext', JSON.stringify({ status: formData.status, currency: formData.currency }));
-            navigate('/finance');
+            navigate('/finance'); // Move to step 2
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to save business profile');
-        } finally {
-            setLoading(false);
+            setError(err.response?.data?.error || 'Failed to save profile');
         }
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4 bg-background min-h-screen">
-            <div className="glass-panel w-full max-w-2xl p-8">
+        <div className="flex-1 flex items-center justify-center p-4 min-h-screen">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
+                className="glass-panel w-full max-w-2xl p-8"
+            >
                 <div className="mb-8 border-b border-white/10 pb-6">
-                    <h1 className="text-3xl font-bold text-white mb-2">Business Profile</h1>
-                    <p className="text-slate-400">Tell us about your company so our AI can provide tailored insights.</p>
+                    <h1 className="text-3xl font-black text-white mb-2 tracking-tight">Business Profile</h1>
+                    <p className="text-slate-400 font-medium">Tell us about your company so our AI can provide tailored insights.</p>
                 </div>
 
-                {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6">{error}</div>}
+                {error && <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl mb-6 font-medium">{error}</div>}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         <div>
+                            <label className="label-text">Business Name</label>
+                            <input 
+                                type="text" className="input-field" placeholder="Acme Corp" required
+                                value={formData.name} onChange={(e) => setFormData({...formData, name: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="label-text">Industry</label>
+                            <input 
+                                type="text" className="input-field" placeholder="e.g. Retail, SaaS, Bakery" required
+                                value={formData.industry} onChange={(e) => setFormData({...formData, industry: e.target.value})}
+                            />
+                        </div>
+                    </div>
+
+                    <div>
+                        <label className="label-text">What does your business do?</label>
+                        <textarea 
+                            className="input-field h-24 resize-none" required
+                            placeholder="We sell artisanal coffee and pastries..."
+                            value={formData.description} onChange={(e) => setFormData({...formData, description: e.target.value})}
+                        ></textarea>
+                    </div>
+
+                    <div>
+                        <label className="label-text">What is your primary goal right now?</label>
+                        <input 
+                            type="text" className="input-field" required
+                            placeholder="e.g. Get first 100 customers, secure funding"
+                            value={formData.goal} onChange={(e) => setFormData({...formData, goal: e.target.value})}
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
                             <label className="label-text">Business Status</label>
-                            <select name="status" className="input-field" value={formData.status} onChange={handleChange}>
-                                <option value="started">Already Started</option>
-                                <option value="planning">Going to Start (Planning)</option>
+                            <select 
+                                className="input-field bg-slate-900" required
+                                value={formData.status} onChange={(e) => setFormData({...formData, status: e.target.value})}
+                            >
+                                <option value="planning">Just Planning / Going to Start</option>
+                                <option value="active">Already Started / Active</option>
                             </select>
                         </div>
                         <div>
-                            <label className="label-text">Preferred Currency</label>
-                            <select name="currency" className="input-field" value={formData.currency} onChange={handleChange}>
+                            <label className="label-text">Primary Currency</label>
+                            <select 
+                                className="input-field bg-slate-900" required
+                                value={formData.currency} onChange={(e) => setFormData({...formData, currency: e.target.value})}
+                            >
                                 <option value="USD">USD ($)</option>
                                 <option value="EUR">EUR (€)</option>
                                 <option value="GBP">GBP (£)</option>
@@ -65,34 +111,11 @@ const BusinessProfile = () => {
                         </div>
                     </div>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div>
-                            <label className="label-text">Business Name</label>
-                            <input type="text" name="name" className="input-field" placeholder="Acme Corp" value={formData.name} onChange={handleChange} required />
-                        </div>
-                        <div>
-                            <label className="label-text">Industry</label>
-                            <input type="text" name="industry" className="input-field" placeholder="E-commerce, SaaS, etc." value={formData.industry} onChange={handleChange} required />
-                        </div>
-                    </div>
-                    
-                    <div>
-                        <label className="label-text">Business Description</label>
-                        <textarea name="description" className="input-field min-h-[100px] resize-none" placeholder="What does your business do? Who are your customers?" value={formData.description} onChange={handleChange}></textarea>
-                    </div>
-
-                    <div>
-                        <label className="label-text">Primary Goal</label>
-                        <input type="text" name="goal" className="input-field" placeholder="e.g., Increase ARR by 20%, reduce churn, etc." value={formData.goal} onChange={handleChange} />
-                    </div>
-
-                    <div className="flex justify-end pt-4">
-                        <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? 'Saving...' : 'Continue to Financials'}
-                        </button>
+                    <div className="pt-4">
+                        <button type="submit" className="btn-primary w-full py-4 text-lg">Next: Financials &rarr;</button>
                     </div>
                 </form>
-            </div>
+            </motion.div>
         </div>
     );
 };

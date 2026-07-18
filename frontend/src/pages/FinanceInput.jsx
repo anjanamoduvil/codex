@@ -8,104 +8,111 @@ const FinanceInput = () => {
     const [formData, setFormData] = useState({
         monthly_revenue: '',
         monthly_expenses: '',
-        cash_on_hand: ''
+        cash_on_hand: '',
+        income_amount: '',
+        income_frequency: 'monthly'
     });
-    const [bizContext, setBizContext] = useState({ status: 'started', currency: 'USD' });
-    const [loading, setLoading] = useState(false);
     const [error, setError] = useState('');
+    const [business, setBusiness] = useState(null);
     const navigate = useNavigate();
 
     useEffect(() => {
-        const savedCtx = sessionStorage.getItem('bizContext');
-        if (savedCtx) setBizContext(JSON.parse(savedCtx));
-    }, []);
-
-    const isPlanning = bizContext.status === 'planning';
-    const sym = currencySymbols[bizContext.currency] || '$';
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
+        const fetchBusiness = async () => {
+            try {
+                const res = await api.get('/business');
+                setBusiness(res.data);
+            } catch (err) {
+                navigate('/business'); // Redirect if no business profile
+            }
+        };
+        fetchBusiness();
+    }, [navigate]);
 
     const handleSubmit = async (e) => {
         e.preventDefault();
-        setLoading(true);
-        setError('');
+        
+        // Auto-calculate monthly revenue based on income frequency
+        let calculatedMonthly = 0;
+        const amount = parseFloat(formData.income_amount) || 0;
+        if (formData.income_frequency === 'daily') calculatedMonthly = amount * 30;
+        else if (formData.income_frequency === 'yearly') calculatedMonthly = amount / 12;
+        else calculatedMonthly = amount;
+
+        const dataToSubmit = {
+            ...formData,
+            monthly_revenue: calculatedMonthly
+        };
+
         try {
-            await api.post('/finance', {
-                monthly_revenue: formData.monthly_revenue ? parseFloat(formData.monthly_revenue) : 0,
-                monthly_expenses: formData.monthly_expenses ? parseFloat(formData.monthly_expenses) : 0,
-                cash_on_hand: formData.cash_on_hand ? parseFloat(formData.cash_on_hand) : 0
-            });
+            await api.post('/finance', dataToSubmit);
             navigate('/dashboard');
         } catch (err) {
-            setError(err.response?.data?.error || 'Failed to save financial data');
-        } finally {
-            setLoading(false);
+            setError(err.response?.data?.error || 'Failed to save finance data');
         }
     };
 
+    if (!business) return null;
+
+    const sym = currencySymbols[business.currency] || '$';
+    const isPlanning = business.status === 'planning';
+
     return (
-        <div className="flex-1 flex items-center justify-center p-4 bg-background min-h-screen">
+        <div className="flex-1 flex items-center justify-center p-4 min-h-screen">
             <div className="glass-panel w-full max-w-xl p-8">
                 <div className="mb-8 border-b border-white/10 pb-6 text-center">
-                    <h1 className="text-3xl font-bold text-white mb-2">
+                    <h1 className="text-3xl font-black text-white mb-2 tracking-tight">
                         {isPlanning ? 'Launch Financials' : 'Financial Snapshot'}
                     </h1>
-                    <p className="text-slate-400">
-                        {isPlanning ? 'Enter your estimated costs and initial capital to calculate runway.' : 'Enter your current numbers to calculate runway and financial health.'}
-                    </p>
+                    <p className="text-slate-400 font-medium">Let's look at the numbers to tailor your AI insights.</p>
                 </div>
 
-                {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6">{error}</div>}
+                {error && <div className="bg-red-500/10 text-red-400 p-4 rounded-xl mb-6 border border-red-500/30 text-sm">{error}</div>}
 
                 <form onSubmit={handleSubmit} className="space-y-6">
-                    <div>
-                        <label className="label-text">{isPlanning ? 'Estimated Monthly Revenue (Optional)' : 'Monthly Revenue'} ({sym})</label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">{sym}</span>
-                            <input 
-                                type="number" name="monthly_revenue" className="input-field pl-8" 
-                                placeholder="0" min="0" step="0.01"
-                                value={formData.monthly_revenue} onChange={handleChange} 
-                                required={!isPlanning}
-                            />
+                    {/* Advanced Income Section */}
+                    <div className="bg-black/30 p-6 rounded-2xl border border-white/10 shadow-sm">
+                        <h3 className="text-lg font-bold text-white mb-4 flex items-center gap-2">💰 Income Tracking</h3>
+                        <p className="text-xs text-slate-400 mb-4">We will use this to calculate your monthly revenue and generate specific marketing strategies.</p>
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                            <div>
+                                <label className="label-text">Income Amount ({sym})</label>
+                                <input 
+                                    type="number" className="input-field" placeholder="0" required min="0"
+                                    value={formData.income_amount} onChange={(e) => setFormData({...formData, income_amount: e.target.value})}
+                                />
+                            </div>
+                            <div>
+                                <label className="label-text">Frequency</label>
+                                <select 
+                                    className="input-field bg-slate-900" required
+                                    value={formData.income_frequency} onChange={(e) => setFormData({...formData, income_frequency: e.target.value})}
+                                >
+                                    <option value="daily">Per Day</option>
+                                    <option value="monthly">Per Month</option>
+                                    <option value="yearly">Per Year</option>
+                                </select>
+                            </div>
                         </div>
                     </div>
-                    
-                    <div>
-                        <label className="label-text">{isPlanning ? 'Estimated Monthly Burn / Expenses' : 'Monthly Expenses'} ({sym})</label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">{sym}</span>
+
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label className="label-text">{isPlanning ? `Estimated Monthly Expenses (${sym})` : `Average Monthly Expenses (${sym})`}</label>
                             <input 
-                                type="number" name="monthly_expenses" className="input-field pl-8" 
-                                placeholder="0" min="0" step="0.01"
-                                value={formData.monthly_expenses} onChange={handleChange} 
-                                required={!isPlanning}
+                                type="number" className="input-field" placeholder="0" required min="0"
+                                value={formData.monthly_expenses} onChange={(e) => setFormData({...formData, monthly_expenses: e.target.value})}
+                            />
+                        </div>
+                        <div>
+                            <label className="label-text">{isPlanning ? `Initial Capital Available (${sym})` : `Current Cash on Hand (${sym})`}</label>
+                            <input 
+                                type="number" className="input-field" placeholder="0" required min="0"
+                                value={formData.cash_on_hand} onChange={(e) => setFormData({...formData, cash_on_hand: e.target.value})}
                             />
                         </div>
                     </div>
 
-                    <div>
-                        <label className="label-text">{isPlanning ? 'Initial Capital Available' : 'Current Cash on Hand'} ({sym})</label>
-                        <div className="relative">
-                            <span className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">{sym}</span>
-                            <input 
-                                type="number" name="cash_on_hand" className="input-field pl-8" 
-                                placeholder="50000" min="0" step="0.01"
-                                value={formData.cash_on_hand} onChange={handleChange} required
-                            />
-                        </div>
-                    </div>
-
-                    <div className="flex justify-between pt-4">
-                        <button type="button" onClick={() => navigate('/business')} className="px-4 py-2 text-slate-400 hover:text-white transition-colors">
-                            Back
-                        </button>
-                        <button type="submit" className="btn-primary" disabled={loading}>
-                            {loading ? 'Saving...' : 'Generate Dashboard'}
-                        </button>
-                    </div>
+                    <button type="submit" className="btn-primary w-full py-4 mt-8 text-lg">Generate AI Insights 🚀</button>
                 </form>
             </div>
         </div>

@@ -19,15 +19,22 @@ router.post('/', verifyToken, (req, res) => {
         if (err) return res.status(500).json({ error: 'Database error' });
         if (!business) return res.status(404).json({ error: 'Business profile not found. Please create it first.' });
 
-        // Save finance record
-        db.run(
-            `INSERT INTO finances (business_id, monthly_revenue, monthly_expenses, cash_on_hand, month) VALUES (?, ?, ?, ?, ?)`,
-            [business.id, monthly_revenue, monthly_expenses, cash_on_hand, month || new Date().toISOString().slice(0, 7)],
-            function(err) {
-                if (err) return res.status(500).json({ error: 'Database error on insert' });
-                res.json({ message: 'Finance data saved successfully', finance_id: this.lastID });
-            }
-        );
+        const query = `
+            INSERT INTO finances (business_id, monthly_revenue, monthly_expenses, cash_on_hand, income_amount, income_frequency)
+            VALUES (?, ?, ?, ?, ?, ?)
+            ON CONFLICT(business_id) DO UPDATE SET
+                monthly_revenue = excluded.monthly_revenue,
+                monthly_expenses = excluded.monthly_expenses,
+                cash_on_hand = excluded.cash_on_hand,
+                income_amount = excluded.income_amount,
+                income_frequency = excluded.income_frequency,
+                updated_at = CURRENT_TIMESTAMP
+        `;
+
+        db.run(query, [business.id, monthly_revenue, monthly_expenses, cash_on_hand, income_amount || 0, income_frequency || 'monthly'], function(err) {
+            if (err) return res.status(500).json({ error: 'Database error on insert' });
+            res.json({ message: 'Finance data saved successfully', finance_id: this.lastID });
+        });
     });
 });
 

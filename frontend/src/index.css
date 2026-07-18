@@ -1,34 +1,34 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #1e1612; /* Deep warm espresso brown */
-  --color-surface: #2d221c;   /* Slightly lighter warm brown */
-  --color-primary: #38bdf8;   /* Light cyan/teal matching the robot */
-  --color-secondary: #0284c7; /* Darker blue */
-  --color-accent: #f59e0b;    /* Warm amber/wood from the coffee shop */
+  --color-background: #09090b; /* Deep Space Black */
+  --color-surface: rgba(24, 24, 27, 0.4); /* Highly transparent surface */
+  --color-primary: #06b6d4;   /* Neon Cyan */
+  --color-secondary: #8b5cf6; /* Electric Purple */
+  --color-accent: #f43f5e;    /* Neon Pink */
 }
 
 @layer base {
   body {
-    @apply bg-background text-white antialiased selection:bg-primary/30 selection:text-white min-h-screen flex flex-col;
+    @apply bg-background text-white antialiased selection:bg-primary/30 selection:text-white min-h-screen flex flex-col overflow-x-hidden;
   }
 }
 
 @layer components {
   .glass-panel {
-    @apply bg-surface/80 backdrop-blur-md border border-white/10 rounded-2xl shadow-xl;
+    @apply bg-surface backdrop-blur-xl border border-white/5 rounded-3xl shadow-2xl;
   }
   
   .btn-primary {
-    @apply bg-gradient-to-r from-primary to-secondary hover:from-primary/90 hover:to-secondary/90 text-white font-medium py-3 px-6 rounded-xl transition-all duration-300 shadow-lg hover:shadow-primary/25 active:scale-95;
+    @apply bg-gradient-to-r from-primary to-secondary hover:from-primary/80 hover:to-secondary/80 text-white font-bold py-3 px-6 rounded-2xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_30px_rgba(139,92,246,0.5)] active:scale-95;
   }
 
   .input-field {
-    @apply w-full bg-slate-900/50 border border-slate-700 rounded-xl px-4 py-3 text-white placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all;
+    @apply w-full bg-black/40 border border-white/10 rounded-2xl px-4 py-3 text-white placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-primary focus:border-transparent transition-all backdrop-blur-sm;
   }
 
   .label-text {
-    @apply block text-sm font-medium text-slate-300 mb-2;
+    @apply block text-sm font-semibold text-slate-300 mb-2 uppercase tracking-wider;
   }
 }
 
