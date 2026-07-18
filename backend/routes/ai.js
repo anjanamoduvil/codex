@@ -21,7 +21,7 @@ router.post('/analyze', verifyToken, (req, res) => {
 
             try {
                 // Construct prompt
-                const systemPrompt = "Return ONLY valid JSON with keys growth_suggestion, marketing_suggestion, finance_insight, runway_months (number). No preamble, no markdown. Your output must start with { and end with }.";
+                const systemPrompt = "Return ONLY valid JSON with keys: growth_suggestion (string), marketing_suggestion (string), finance_insight (string), runway_months (number), actionable_steps (array of 5 string items), market_trends (array of 2 string items). No preamble, no markdown. Your output must start with { and end with }.";
                 const userPrompt = `
 Business Profile:
 Name: ${business.name}
@@ -52,24 +52,32 @@ Analyze this business. If it's in the planning phase, provide a launch growth st
                 let parsed;
                 try {
                     parsed = JSON.parse(rawJson);
+                    const report = JSON.parse(rawJson);
+
+                    // Save report
+                    db.run(
+                        `INSERT INTO ai_reports (business_id, growth_suggestion, marketing_suggestion, finance_insight, runway_months, actionable_steps, market_trends) 
+                         VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                        [
+                            business.id, 
+                            report.growth_suggestion, 
+                            report.marketing_suggestion, 
+                            report.finance_insight, 
+                            report.runway_months,
+                            JSON.stringify(report.actionable_steps || []),
+                            JSON.stringify(report.market_trends || [])
+                        ],
+                        function(err) {
+                            if (err) return res.status(500).json({ error: 'Failed to save report' });
+                            res.json({ message: 'Analysis complete', report_id: this.lastID });
+                        }
+                    );
                 } catch (parseErr) {
-                    console.error("Failed to parse OpenAI JSON response:", rawJson);
-                    return res.status(500).json({ error: 'AI returned invalid JSON' });
+                    res.status(500).json({ error: 'Failed to parse AI response' });
                 }
-
-                // Save report
-                db.run(
-                    `INSERT INTO ai_reports (business_id, growth_suggestion, marketing_suggestion, finance_insight, runway_months) VALUES (?, ?, ?, ?, ?)`,
-                    [business.id, parsed.growth_suggestion, parsed.marketing_suggestion, parsed.finance_insight, parsed.runway_months],
-                    function(err) {
-                        if (err) return res.status(500).json({ error: 'Failed to save AI report' });
-                        res.json({ message: 'Analysis complete', report: parsed });
-                    }
-                );
-
             } catch (apiErr) {
-                console.error("OpenAI API Error:", apiErr);
-                res.status(500).json({ error: 'Failed to generate AI analysis' });
+                console.error("OpenAI Error:", apiErr);
+                res.status(500).json({ error: 'Failed to generate insights' });
             }
         });
     });

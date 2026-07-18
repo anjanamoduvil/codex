@@ -20,11 +20,11 @@ const Login = () => {
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4">
-            <div className="glass-panel w-full max-w-md p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Welcome Back</h1>
-                    <p className="text-slate-400 mt-2">Log in to your dashboard</p>
+        <div className="flex-1 flex items-center justify-center p-8 md:p-12 min-h-screen bg-background">
+            <div className="w-full max-w-md glass-panel p-8">
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl font-bold text-white mb-2">Welcome Back</h2>
+                    <p className="text-slate-400">Sign in to your AI dashboard</p>
                 </div>
                 
                 {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm">{error}</div>}
@@ -52,11 +52,11 @@ const Login = () => {
                             required
                         />
                     </div>
-                    <button type="submit" className="btn-primary w-full">Sign In</button>
+                    <button type="submit" className="btn-primary w-full py-3">Sign In</button>
                 </form>
                 
-                <p className="text-center mt-6 text-slate-400 text-sm">
-                    Don't have an account? <Link to="/signup" className="text-accent hover:underline">Sign up</Link>
+                <p className="text-center mt-8 text-slate-400 text-sm">
+                    Don't have an account? <Link to="/signup" className="text-accent hover:text-white hover:underline font-medium transition-colors">Sign up for free</Link>
                 </p>
             </div>
         </div>

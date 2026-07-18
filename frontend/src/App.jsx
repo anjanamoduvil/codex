@@ -6,6 +6,7 @@ import Signup from './pages/Signup';
 import BusinessProfile from './pages/BusinessProfile';
 import FinanceInput from './pages/FinanceInput';
 import Dashboard from './pages/Dashboard';
+import Landing from './pages/Landing';
 
 const ProtectedRoute = ({ children }) => {
   const { user, loading } = useContext(AuthContext);
@@ -48,7 +49,8 @@ const AppRoutes = () => {
       } />
       
       {/* Default redirect */}
-      <Route path="*" element={<Navigate to={user ? "/dashboard" : "/login"} replace />} />
+      <Route path="/" element={user ? <Navigate to="/dashboard" replace /> : <Landing />} />
+      <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
   );
 };

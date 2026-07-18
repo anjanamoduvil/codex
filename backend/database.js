@@ -47,6 +47,8 @@ const db = new sqlite3.Database(dbPath, (err) => {
                 marketing_suggestion TEXT,
                 finance_insight TEXT,
                 runway_months REAL,
+                actionable_steps TEXT,
+                market_trends TEXT,
                 created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
                 FOREIGN KEY(business_id) REFERENCES businesses(id)
             )`);

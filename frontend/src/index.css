@@ -31,3 +31,25 @@
     @apply block text-sm font-medium text-slate-300 mb-2;
   }
 }
+
+@media print {
+  /* Hide UI elements that shouldn't be in the PDF */
+  button, #export-btn, #generate-btn, header button {
+    display: none !important;
+  }
+  
+  /* Force dark theme to print correctly */
+  body, .bg-background {
+    background-color: #0f172a !important;
+    color: white !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+  
+  /* Ensure backgrounds of panels stay visible */
+  .glass-panel {
+    background-color: #1e293b !important;
+    -webkit-print-color-adjust: exact !important;
+    print-color-adjust: exact !important;
+  }
+}

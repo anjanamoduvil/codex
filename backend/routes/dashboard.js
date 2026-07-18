@@ -24,11 +24,19 @@ router.get('/', verifyToken, (req, res) => {
             dashboardData.finance = finance || null;
 
             // Fetch latest AI report
-            db.get(`SELECT * FROM ai_reports WHERE business_id = ? ORDER BY id DESC LIMIT 1`, [business.id], (err, aiReport) => {
+            db.get(`SELECT * FROM ai_reports WHERE business_id = ? ORDER BY id DESC LIMIT 1`, [business.id], (err, report) => {
                 if (err) return res.status(500).json({ error: 'Database error fetching ai report' });
-                dashboardData.ai_report = aiReport || null;
-
-                res.json(dashboardData);
+                if (report) {
+                    try {
+                        if (report.actionable_steps) report.actionable_steps = JSON.parse(report.actionable_steps);
+                        if (report.market_trends) report.market_trends = JSON.parse(report.market_trends);
+                    } catch(e) {}
+                }
+                res.json({
+                    business,
+                    finance,
+                    ai_report: report
+                });
             });
         });
     });

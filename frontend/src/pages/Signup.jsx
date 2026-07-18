@@ -14,23 +14,23 @@ const Signup = () => {
         e.preventDefault();
         try {
             await signup(name, email, password);
-            navigate('/business'); // Redirect to profile setup first time
+            navigate('/business');
         } catch (err) {
             setError(err.response?.data?.error || 'Failed to sign up');
         }
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4">
-            <div className="glass-panel w-full max-w-md p-8">
-                <div className="text-center mb-8">
-                    <h1 className="text-3xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-primary to-secondary">Create Account</h1>
-                    <p className="text-slate-400 mt-2">Start your AI-powered journey</p>
+        <div className="flex-1 flex items-center justify-center p-8 md:p-12 min-h-screen bg-background">
+            <div className="w-full max-w-md glass-panel p-8">
+                <div className="text-center mb-10">
+                    <h2 className="text-3xl font-bold text-white mb-2">Create an Account</h2>
+                    <p className="text-slate-400">Start your AI-powered journey today</p>
                 </div>
                 
                 {error && <div className="bg-red-500/10 border border-red-500/50 text-red-400 p-3 rounded-lg mb-6 text-sm">{error}</div>}
                 
-                <form onSubmit={handleSubmit} className="space-y-4">
+                <form onSubmit={handleSubmit} className="space-y-6">
                     <div>
                         <label className="label-text">Full Name</label>
                         <input 
@@ -64,11 +64,11 @@ const Signup = () => {
                             required
                         />
                     </div>
-                    <button type="submit" className="btn-primary w-full mt-2">Sign Up</button>
+                    <button type="submit" className="btn-primary w-full py-3 mt-4">Sign Up</button>
                 </form>
                 
-                <p className="text-center mt-6 text-slate-400 text-sm">
-                    Already have an account? <Link to="/login" className="text-accent hover:underline">Log in</Link>
+                <p className="text-center mt-8 text-slate-400 text-sm">
+                    Already have an account? <Link to="/login" className="text-accent hover:text-white hover:underline font-medium transition-colors">Log in here</Link>
                 </p>
             </div>
         </div>

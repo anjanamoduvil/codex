@@ -46,7 +46,7 @@ const FinanceInput = () => {
     };
 
     return (
-        <div className="flex-1 flex items-center justify-center p-4">
+        <div className="flex-1 flex items-center justify-center p-4 bg-background min-h-screen">
             <div className="glass-panel w-full max-w-xl p-8">
                 <div className="mb-8 border-b border-white/10 pb-6 text-center">
                     <h1 className="text-3xl font-bold text-white mb-2">
