@@ -41,4 +41,14 @@ router.post('/', verifyToken, (req, res) => {
     });
 });
 
+// GET /api/business
+router.get('/', verifyToken, (req, res) => {
+    const userId = req.userId;
+    db.get(`SELECT * FROM businesses WHERE user_id = ?`, [userId], (err, row) => {
+        if (err) return res.status(500).json({ error: 'Database error' });
+        if (!row) return res.status(404).json({ error: 'Not found' });
+        res.json(row);
+    });
+});
+
 module.exports = router;
