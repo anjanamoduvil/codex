@@ -6,7 +6,7 @@ import api from '../api/axios';
 
 const COLORS = ['#3b82f6', '#8b5cf6', '#06b6d4', '#10b981'];
 
-const DetailModal = ({ isOpen, onClose, topic, initialContent, financeData, currencySym }) => {
+const DetailModal = ({ isOpen, onClose, topic, initialContent, financeData, currencySym, onUpdate }) => {
     const [messages, setMessages] = useState([]);
     const [input, setInput] = useState('');
     const [loading, setLoading] = useState(false);
@@ -138,8 +138,9 @@ const DetailModal = ({ isOpen, onClose, topic, initialContent, financeData, curr
                 income_frequency: simFreq,
                 monthly_revenue: simRevenue
             });
+            if (onUpdate) await onUpdate(); // Fetch new data globally
             // Let the user know they should close and regenerate
-            setMessages(prev => [...prev, { role: 'assistant', content: `I've updated your financial profile! Your new simulated monthly revenue is ${currencySym}${simRevenue.toLocaleString()}. Please close this window and hit the "Generate" button in the dock to update your full Growth and Marketing strategies based on this new income!` }]);
+            setMessages(prev => [...prev, { role: 'assistant', content: `I've updated your financial profile! Your new simulated monthly revenue is ${currencySym}${simRevenue.toLocaleString()}. The other charts (like Growth) will now reflect this base revenue! Please hit the "Generate" button in the dock to update your full Growth and Marketing strategies based on this new income!` }]);
             messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
         } catch (err) {
             setMessages(prev => [...prev, { role: 'assistant', content: 'Failed to update simulation.' }]);

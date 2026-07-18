@@ -257,7 +257,15 @@ const Dashboard = () => {
 
             <SmartDock onGenerate={handleGenerateAI} aiLoading={aiLoading} />
             
-            <DetailModal isOpen={modalConfig.isOpen} onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} topic={modalConfig.topic} initialContent={modalConfig.content} financeData={data?.finance} currencySym={sym} />
+            <DetailModal 
+                isOpen={modalConfig.isOpen} 
+                onClose={() => setModalConfig({ ...modalConfig, isOpen: false })} 
+                topic={modalConfig.topic} 
+                initialContent={modalConfig.content} 
+                financeData={data?.finance} 
+                currencySym={sym} 
+                onUpdate={fetchDashboard}
+            />
         </motion.div>
     );
 };
