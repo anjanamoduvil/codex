@@ -117,4 +117,28 @@ Provide a concise, helpful, and strategic answer. Format your response in plain 
     });
 });
 
+// POST /api/ai/chat - Standalone chat assistant
+router.post('/chat', verifyToken, async (req, res) => {
+    const { message, context } = req.body;
+    if (!message) return res.status(400).json({ error: 'Message is required' });
+
+    try {
+        const systemPrompt = `You are Trio AI, an expert business advisor for small businesses. Keep your answers extremely concise, friendly, and actionable. Max 2-3 short paragraphs. Use emojis where appropriate. Context about user: ${context || 'None'}`;
+        
+        const completion = await openai.chat.completions.create({
+            model: "gpt-3.5-turbo",
+            messages: [
+                { role: "system", content: systemPrompt },
+                { role: "user", content: message }
+            ],
+            max_tokens: 200
+        });
+
+        res.json({ response: completion.choices[0].message.content });
+    } catch (err) {
+        console.error("AI Chat Error:", err);
+        res.status(500).json({ error: 'Failed to get AI response' });
+    }
+});
+
 module.exports = router;

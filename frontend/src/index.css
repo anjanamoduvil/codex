@@ -1,11 +1,11 @@
 @import "tailwindcss";
 
 @theme {
-  --color-background: #0f172a;
-  --color-surface: #1e293b;
-  --color-primary: #3b82f6;
-  --color-secondary: #8b5cf6;
-  --color-accent: #06b6d4;
+  --color-background: #1e1612; /* Deep warm espresso brown */
+  --color-surface: #2d221c;   /* Slightly lighter warm brown */
+  --color-primary: #38bdf8;   /* Light cyan/teal matching the robot */
+  --color-secondary: #0284c7; /* Darker blue */
+  --color-accent: #f59e0b;    /* Warm amber/wood from the coffee shop */
 }
 
 @layer base {

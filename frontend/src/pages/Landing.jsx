@@ -7,19 +7,19 @@ const Landing = () => {
 
     return (
         <div className="relative min-h-screen flex flex-col items-center justify-center p-4">
-            <div className="absolute inset-0 z-0 overflow-hidden">
+            <div className="absolute inset-0 z-0 overflow-hidden bg-background">
                 <img 
                     src={heroImg} 
                     alt="Welcome to Trio" 
-                    className="w-full h-full object-cover"
+                    className="w-full h-full object-cover object-top"
                 />
-                <div className="absolute inset-0 bg-black/20"></div>
+                <div className="absolute inset-0 bg-black/10"></div>
             </div>
 
-            <div className="relative z-10 flex flex-col items-center text-center mt-[10vh]">
+            <div className="relative z-10 flex flex-col items-center text-center mt-auto mb-16 md:mb-24">
                 <button 
                     onClick={() => navigate('/login')}
-                    className="btn-primary text-xl px-12 py-5 shadow-2xl hover:scale-105 transition-transform"
+                    className="bg-primary hover:bg-secondary text-white text-xl px-12 py-5 rounded-xl shadow-2xl hover:scale-105 transition-transform font-bold tracking-wide"
                 >
                     Welcome to Trio AI
                 </button>

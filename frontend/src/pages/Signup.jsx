@@ -1,6 +1,7 @@
 import React, { useState, useContext } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { AuthContext } from '../context/AuthContext';
+import { motion } from 'framer-motion';
 
 const Signup = () => {
     const [name, setName] = useState('');
@@ -22,7 +23,10 @@ const Signup = () => {
 
     return (
         <div className="flex-1 flex items-center justify-center p-8 md:p-12 min-h-screen bg-background">
-            <div className="w-full max-w-md glass-panel p-8">
+            <motion.div 
+                initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.6, ease: "easeOut" }}
+                className="w-full max-w-md glass-panel p-8 shadow-2xl"
+            >
                 <div className="text-center mb-10">
                     <h2 className="text-3xl font-bold text-white mb-2">Create an Account</h2>
                     <p className="text-slate-400">Start your AI-powered journey today</p>
@@ -70,7 +74,7 @@ const Signup = () => {
                 <p className="text-center mt-8 text-slate-400 text-sm">
                     Already have an account? <Link to="/login" className="text-accent hover:text-white hover:underline font-medium transition-colors">Log in here</Link>
                 </p>
-            </div>
+            </motion.div>
         </div>
     );
 };
